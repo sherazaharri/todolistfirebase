@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:posthog_flutter/posthog_flutter.dart';
 import 'entry_card.dart';
 import 'task.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:random_string/random_string.dart';
+import 'package:pattern_formatter/pattern_formatter.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -110,6 +112,8 @@ class _ToDoListState extends State<ToDoList> {
                           borderRadius: BorderRadius.circular(9.0)
                       )
                   ),
+                  inputFormatters: [DateInputFormatter()],
+                  keyboardType: TextInputType.number,
                 ),
                 SizedBox(height: 10.0,),
                 Row(
@@ -117,6 +121,7 @@ class _ToDoListState extends State<ToDoList> {
                   children: [
                     OutlinedButton(
                       onPressed: ()async {
+                        await Posthog().capture(eventName: 'add_task_button_clicked',);
                         newID = randomString(5);
                         collRef.doc(newID).set({'task': taskController.text, 'date': dateController.text,});
                         setState(() {
@@ -129,19 +134,6 @@ class _ToDoListState extends State<ToDoList> {
                         side: BorderSide(width: 2.0, color: Colors.blue)
                       ),
                   ),
-                    OutlinedButton(
-                      onPressed: ()async {
-                        collRef.doc('testingahh').delete().then(
-                                (doc) => print('Document Deleted'),
-                                onError: (e) => print("Error updating document")
-                        );
-                      },
-                      child: Text("Delete Task"),
-                      style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.blue,
-                          side: BorderSide(width: 2.0, color: Colors.blue)
-                      ),
-                    ),
                 ]),
                 Divider(
                   height: 20,
